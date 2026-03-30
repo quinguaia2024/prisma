@@ -1,7 +1,8 @@
-import { Droplets, Thermometer, Waves, Wind, Power, AlertTriangle } from "lucide-react";
+import { Droplets, Thermometer, Waves, Wind, Power, AlertTriangle, Flame, Sun } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { GaugeChart } from "@/components/GaugeChart";
 import { useSensorData } from "@/hooks/useSensorData";
+import { useAlertSound } from "@/hooks/useAlertSound";
 import { getStatusColor, mockAlerts } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
