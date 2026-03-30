@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSensorData } from "@/hooks/useSensorData";
 import { GaugeChart } from "@/components/GaugeChart";
 import { Progress } from "@/components/ui/progress";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 export default function ReservoirPage() {
   const { current, getFilteredHistory } = useSensorData();
@@ -10,12 +10,20 @@ export default function ReservoirPage() {
   const risk = level > 50 ? 'Baixo' : level > 25 ? 'Médio' : 'Alto';
   const riskColor = level > 50 ? 'text-success' : level > 25 ? 'text-warning' : 'text-destructive';
 
-  const consumptionData = getFilteredHistory(24)
+  const data = getFilteredHistory(24)
     .filter((_, i) => i % 4 === 0)
     .map(d => ({
       time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       nivel: d.waterLevel,
     }));
+
+  const tooltipStyle = {
+    background: 'hsl(var(--card))',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: '8px',
+    fontSize: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  };
 
   return (
     <div className="space-y-6">
@@ -48,24 +56,19 @@ export default function ReservoirPage() {
 
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Consumo de Água (24h)</CardTitle>
+            <CardTitle className="text-sm font-medium">Evolução do Nível (24h)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={consumptionData}>
-                  <defs>
-                    <linearGradient id="reservoirGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
+                <LineChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" domain={[0, 100]} />
-                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
-                  <Area type="monotone" dataKey="nivel" stroke="hsl(var(--chart-2))" fill="url(#reservoirGradient)" strokeWidth={2} name="Nível %" />
-                </AreaChart>
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  <Line type="monotone" dataKey="nivel" stroke="hsl(var(--chart-2))" strokeWidth={2.5} dot={{ r: 3, fill: 'hsl(var(--chart-2))' }} activeDot={{ r: 6 }} name="Nível %" />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>

@@ -3,7 +3,7 @@ import { useSensorData } from "@/hooks/useSensorData";
 import { getAirQualityLabel, getStatusColor } from "@/lib/mockData";
 import { GaugeChart } from "@/components/GaugeChart";
 import { Wind } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 export default function AirQualityPage() {
   const { current, getFilteredHistory } = useSensorData();
@@ -13,10 +13,26 @@ export default function AirQualityPage() {
   const colorMap = { good: 'text-success', warning: 'text-warning', danger: 'text-destructive' };
   const bgMap = { good: 'bg-success/10', warning: 'bg-warning/10', danger: 'bg-destructive/10' };
 
-  const data = getFilteredHistory(12).map(d => ({
-    time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-    aqi: d.airQuality,
-  }));
+  const data = getFilteredHistory(12)
+    .filter((_, i) => i % 3 === 0)
+    .map(d => ({
+      time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      aqi: d.airQuality,
+    }));
+
+  const getBarColor = (value: number) => {
+    if (value <= 50) return 'hsl(var(--chart-1))';
+    if (value <= 100) return 'hsl(var(--chart-5))';
+    return 'hsl(var(--destructive))';
+  };
+
+  const tooltipStyle = {
+    background: 'hsl(var(--card))',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: '8px',
+    fontSize: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  };
 
   return (
     <div className="space-y-6">
@@ -52,19 +68,17 @@ export default function AirQualityPage() {
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id="aqiGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-4))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <BarChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
-                  <Area type="monotone" dataKey="aqi" stroke="hsl(var(--chart-4))" fill="url(#aqiGradient)" strokeWidth={2} name="AQI" />
-                </AreaChart>
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Bar dataKey="aqi" radius={[4, 4, 0, 0]} name="AQI" maxBarSize={28}>
+                    {data.map((entry, index) => (
+                      <Cell key={index} fill={getBarColor(entry.aqi)} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
