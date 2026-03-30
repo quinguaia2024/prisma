@@ -1,16 +1,23 @@
-import { Bell, User, Wifi } from "lucide-react";
+import { Bell, LogOut, User, Wifi } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export function DashboardHeader() {
   const [online, setOnline] = useState(true);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const i = setInterval(() => setOnline(Math.random() > 0.05), 10000);
     return () => clearInterval(i);
   }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+    toast.success('Sessão encerrada');
+  };
 
   return (
     <header className="h-14 border-b bg-card flex items-center justify-between px-4 flex-shrink-0">
@@ -31,10 +38,13 @@ export function DashboardHeader() {
             <User className="w-4 h-4 text-primary" />
           </div>
           <div className="hidden md:block">
-            <p className="text-xs font-medium">Admin</p>
+            <p className="text-xs font-medium truncate max-w-[120px]">{user?.email || 'Admin'}</p>
             <p className="text-[10px] text-muted-foreground">Administrador</p>
           </div>
         </div>
+        <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
+          <LogOut className="w-4 h-4" />
+        </Button>
       </div>
     </header>
   );

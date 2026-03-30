@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSensorData } from "@/hooks/useSensorData";
+import { GaugeChart } from "@/components/GaugeChart";
 import { Progress } from "@/components/ui/progress";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function ReservoirPage() {
   const { current, getFilteredHistory } = useSensorData();
@@ -10,7 +11,7 @@ export default function ReservoirPage() {
   const riskColor = level > 50 ? 'text-success' : level > 25 ? 'text-warning' : 'text-destructive';
 
   const consumptionData = getFilteredHistory(24)
-    .filter((_, i) => i % 6 === 0)
+    .filter((_, i) => i % 4 === 0)
     .map(d => ({
       time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       nivel: d.waterLevel,
@@ -29,9 +30,8 @@ export default function ReservoirPage() {
             <CardTitle className="text-sm font-medium">Nível Atual</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="text-center">
-              <span className="text-5xl font-bold">{level}</span>
-              <span className="text-xl text-muted-foreground">%</span>
+            <div className="flex justify-center">
+              <GaugeChart value={level} max={100} label="Nível do Reservatório" unit="%" thresholds={{ good: 50, warning: 75 }} />
             </div>
             <Progress value={level} className="h-4" />
             <div className="flex justify-between text-sm">
@@ -48,18 +48,24 @@ export default function ReservoirPage() {
 
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Histórico de Nível (24h)</CardTitle>
+            <CardTitle className="text-sm font-medium">Consumo de Água (24h)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={consumptionData}>
+                <AreaChart data={consumptionData}>
+                  <defs>
+                    <linearGradient id="reservoirGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" domain={[0, 100]} />
                   <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
-                  <Bar dataKey="nivel" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Nível %" />
-                </BarChart>
+                  <Area type="monotone" dataKey="nivel" stroke="hsl(var(--chart-2))" fill="url(#reservoirGradient)" strokeWidth={2} name="Nível %" />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
