@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSensorData } from "@/hooks/useSensorData";
 import { getAirQualityLabel, getStatusColor } from "@/lib/mockData";
+import { GaugeChart } from "@/components/GaugeChart";
 import { Wind } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function AirQualityPage() {
   const { current, getFilteredHistory } = useSensorData();
@@ -30,11 +31,8 @@ export default function AirQualityPage() {
             <CardTitle className="text-sm font-medium">Índice Atual</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <div className={`inline-flex items-center justify-center w-28 h-28 rounded-full ${bgMap[status]}`}>
-              <div>
-                <span className={`text-3xl font-bold ${colorMap[status]}`}>{aqi}</span>
-                <p className="text-xs text-muted-foreground">AQI</p>
-              </div>
+            <div className="flex justify-center">
+              <GaugeChart value={aqi} max={200} label="Qualidade do Ar" unit="AQI" thresholds={{ good: 25, warning: 50 }} />
             </div>
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${bgMap[status]} ${colorMap[status]} font-medium text-sm`}>
               <Wind className="w-4 h-4" /> {label}
@@ -54,13 +52,19 @@ export default function AirQualityPage() {
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
+                <AreaChart data={data}>
+                  <defs>
+                    <linearGradient id="aqiGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--chart-4))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--chart-4))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
-                  <Line type="monotone" dataKey="aqi" stroke="hsl(var(--chart-4))" strokeWidth={2} dot={false} name="AQI" />
-                </LineChart>
+                  <Area type="monotone" dataKey="aqi" stroke="hsl(var(--chart-4))" fill="url(#aqiGradient)" strokeWidth={2} name="AQI" />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
