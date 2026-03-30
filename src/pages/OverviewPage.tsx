@@ -5,7 +5,7 @@ import { useSensorData } from "@/hooks/useSensorData";
 import { useAlertSound } from "@/hooks/useAlertSound";
 import { getStatusColor, mockAlerts } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useState } from "react";
 
 export default function OverviewPage() {
@@ -14,16 +14,26 @@ export default function OverviewPage() {
   const activeAlerts = mockAlerts.filter(a => !a.resolved);
   const [irrigationOn] = useState(true);
 
-  const chartData = getFilteredHistory(6).map(d => ({
+  const lineData = getFilteredHistory(6).map(d => ({
     time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
     umidade: d.soilMoisture,
     temperatura: d.temperature,
   }));
 
-  const areaData = getFilteredHistory(12).map(d => ({
-    time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-    agua: d.waterLevel,
-  }));
+  const barData = getFilteredHistory(12)
+    .filter((_, i) => i % 3 === 0)
+    .map(d => ({
+      time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      agua: d.waterLevel,
+    }));
+
+  const tooltipStyle = {
+    background: 'hsl(var(--card))',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: '8px',
+    fontSize: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  };
 
   return (
     <div className="space-y-6">
@@ -63,7 +73,7 @@ export default function OverviewPage() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Line Chart */}
+        {/* Line Chart - Umidade & Temperatura */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Umidade & Temperatura (6h)</CardTitle>
@@ -71,40 +81,35 @@ export default function OverviewPage() {
           <CardContent>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <LineChart data={lineData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
-                  <Line type="monotone" dataKey="umidade" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Umidade %" />
-                  <Line type="monotone" dataKey="temperatura" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={false} name="Temp °C" />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  <Line type="monotone" dataKey="umidade" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={{ r: 2, fill: 'hsl(var(--chart-1))' }} activeDot={{ r: 5 }} name="Umidade %" />
+                  <Line type="monotone" dataKey="temperatura" stroke="hsl(var(--chart-3))" strokeWidth={2.5} dot={{ r: 2, fill: 'hsl(var(--chart-3))' }} activeDot={{ r: 5 }} name="Temp °C" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        {/* Area Chart - Water Consumption */}
+        {/* Bar Chart - Nível de Água */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Consumo de Água (12h)</CardTitle>
+            <CardTitle className="text-sm font-medium">Nível de Água (12h)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={areaData}>
-                  <defs>
-                    <linearGradient id="waterGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <BarChart data={barData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" domain={[0, 100]} />
-                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }} />
-                  <Area type="monotone" dataKey="agua" stroke="hsl(var(--chart-2))" fill="url(#waterGradient)" strokeWidth={2} name="Nível %" />
-                </AreaChart>
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Bar dataKey="agua" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Nível %" maxBarSize={32} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>

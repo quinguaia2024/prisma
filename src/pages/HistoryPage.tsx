@@ -5,14 +5,33 @@ import { Download } from "lucide-react";
 import { generateHistoricalData } from "@/lib/mockData";
 import { useState } from "react";
 import { toast } from "sonner";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 const allData = generateHistoricalData(168);
+
+const tooltipStyle = {
+  background: 'hsl(var(--card))',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '8px',
+  fontSize: '12px',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+};
 
 export default function HistoryPage() {
   const [period, setPeriod] = useState(24);
   const cutoff = Date.now() - period * 3600000;
   const filtered = allData.filter(d => d.timestamp.getTime() > cutoff);
   const displayed = filtered.filter((_, i) => i % Math.max(1, Math.floor(filtered.length / 50)) === 0);
+
+  const chartData = filtered
+    .filter((_, i) => i % Math.max(1, Math.floor(filtered.length / 40)) === 0)
+    .map(d => ({
+      time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      umidade: d.soilMoisture,
+      temperatura: d.temperature,
+      agua: d.waterLevel,
+      ar: d.airQuality,
+    }));
 
   const exportCSV = () => {
     const header = 'Data/Hora,Umidade Solo (%),Temperatura (°C),Nível Água (%),Qualidade Ar (AQI)\n';
@@ -49,6 +68,30 @@ export default function HistoryPage() {
           </Button>
         </div>
       </div>
+
+      {/* Chart overview */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Visão Geral do Período</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Legend wrapperStyle={{ fontSize: '11px' }} />
+                <Line type="monotone" dataKey="umidade" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Umidade %" />
+                <Line type="monotone" dataKey="temperatura" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={false} name="Temp °C" />
+                <Line type="monotone" dataKey="agua" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} name="Água %" />
+                <Line type="monotone" dataKey="ar" stroke="hsl(var(--chart-4))" strokeWidth={2} dot={false} name="Ar AQI" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="p-0">
