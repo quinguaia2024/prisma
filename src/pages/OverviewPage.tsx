@@ -10,6 +10,7 @@ import { useState } from "react";
 
 export default function OverviewPage() {
   const { current, getFilteredHistory } = useSensorData();
+  useAlertSound(current);
   const activeAlerts = mockAlerts.filter(a => !a.resolved);
   const [irrigationOn] = useState(true);
 
