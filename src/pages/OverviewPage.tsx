@@ -1,4 +1,4 @@
-import { Droplets, Thermometer, Waves, Wind, Power, AlertTriangle, Flame, Sun, CloudOff } from "lucide-react";
+import { Droplets, Thermometer, Waves, Wind, Power, AlertTriangle, Flame, Sun, Activity } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { GaugeChart } from "@/components/GaugeChart";
 import { useSensorData } from "@/hooks/useSensorData";
