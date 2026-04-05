@@ -1,7 +1,7 @@
 import { Bell, LogOut, User, Wifi, AlertTriangle, Flame, Droplets, Thermometer, Wind } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlerts } from "@/hooks/useAlerts";
 import { toast } from "sonner";
