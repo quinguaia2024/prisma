@@ -66,13 +66,13 @@ export function DashboardHeader() {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => { if (open) markAllRead(); }}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="w-4 h-4" />
-              {activeAlerts.length > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
-                  {activeAlerts.length > 9 ? '9+' : activeAlerts.length}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </Button>
