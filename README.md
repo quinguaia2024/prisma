@@ -78,4 +78,4 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 
 ### Contato
 
-Desenvolvido por **Ludovina Quinguaia**. Para dúvidas ou sugestões, entre em contato pelo e-mail: [seuemail@exemplo.com](mailto:seuemail@exemplo.com).
+Desenvolvido por **Ludovina Quinguaia**. Para dúvidas ou sugestões, entre em contato : [Portofolio Pessoal](ludovina.me).
