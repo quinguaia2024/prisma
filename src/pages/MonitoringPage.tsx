@@ -1,4 +1,5 @@
 import { useSensorData } from "@/hooks/useSensorData";
+import { scaleAirQuality, isReservoirFull } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -44,12 +45,12 @@ export default function MonitoringPage() {
 
   const barDataWater = sampled.map(d => ({
     time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-    agua: d.waterLevel,
+    agua: isReservoirFull(d.waterLevel) ? 100 : 0,
   }));
 
   const barDataAir = sampled.map(d => ({
     time: d.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-    ar: d.airQuality,
+    ar: scaleAirQuality(d.airQuality),
   }));
 
   const noData = rawData.length === 0;
