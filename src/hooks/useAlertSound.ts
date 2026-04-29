@@ -48,17 +48,14 @@ function getCriticalConditions(data: SensorData): CriticalCondition[] {
   if (data.temperature >= 40) {
     conditions.push({ key: 'temperature', message: `ALERTA: Temperatura critica! ${data.temperature}°C`, type: 'critical' });
   }
-  // Water level (digital float: 0 = empty)
-  if (data.waterLevel === 0) {
+  // Boia digital invertida no hardware: 1 = vazio, 0 = cheio
+  if (data.waterLevel !== 0) {
     conditions.push({ key: 'waterLow', message: 'ALERTA: Reservatorio vazio (boia indica nivel critico)', type: 'critical' });
   }
-  // Dangerous smoke
-  if (data.smokeLevel > 200) {
-    conditions.push({ key: 'smoke', message: `ALERTA: Fumaca em nivel perigoso! ${data.smokeLevel} ppm`, type: 'critical' });
-  }
   // Dangerous air quality (percentage)
-  if (data.airQuality >= 70) {
-    conditions.push({ key: 'airBad', message: `ALERTA: Qualidade do ar perigosa! ${data.airQuality}%`, type: 'critical' });
+  const airDisplay = Math.round(data.airQuality * 0.08 * 10) / 10;
+  if (airDisplay >= 70) {
+    conditions.push({ key: 'airBad', message: `ALERTA: Qualidade do ar perigosa! ${airDisplay}%`, type: 'critical' });
   }
 
   // Sensors sending 0 (offline/disconnected)
