@@ -16,7 +16,6 @@ export function useSensorData() {
     waterLevel: Number(row.water_level) || 0,
     airQuality: Number(row.air_quality) || 0,
     flameDetected: Number(row.flame_detected) || 0,
-    smokeLevel: Number(row.smoke_level) || 0,
     ldrValue: Number(row.ldr_value) || 0,
   }), []);
 
