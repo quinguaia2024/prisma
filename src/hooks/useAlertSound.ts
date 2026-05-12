@@ -106,7 +106,8 @@ export function useAlertSound(sensorData: SensorData) {
 
   useEffect(() => {
     const conditions = getCriticalConditions(sensorData);
-    const hasCritical = conditions.some(c => c.type === 'critical');
+    const hasFire = conditions.some(c => c.type === 'fire');
+    const hasCritical = conditions.some(c => c.type === 'critical' || c.type === 'fire');
     const hasAny = conditions.length > 0;
 
     // Show toasts (with cooldown)
@@ -115,7 +116,7 @@ export function useAlertSound(sensorData: SensorData) {
       const last = toastShownRef.current[c.key] || 0;
       if (now - last > TOAST_COOLDOWN) {
         toastShownRef.current[c.key] = now;
-        if (c.type === 'critical') {
+          if (c.type === 'critical' || c.type === 'fire') {
           toast.error(c.message, { duration: 8000 });
         } else {
           toast.warning(c.message, { duration: 6000 });
@@ -127,8 +128,8 @@ export function useAlertSound(sensorData: SensorData) {
     clearInterval_();
 
     if (hasAny) {
-      const beepType = hasCritical ? 'critical' : 'warning';
-      const interval = hasCritical ? 5000 : 10000; // 5s for critical, 10s for warning
+      const beepType: 'fire' | 'critical' | 'warning' = hasFire ? 'fire' : hasCritical ? 'critical' : 'warning';
+      const interval = hasFire ? 3000 : hasCritical ? 5000 : 10000;
 
       // Play immediately
       playAlertBeep(beepType);
