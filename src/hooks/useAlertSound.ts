@@ -2,12 +2,35 @@ import { useEffect, useRef, useCallback } from 'react';
 import { SensorData } from '@/lib/mockData';
 import { toast } from 'sonner';
 
-function playAlertBeep(type: 'critical' | 'warning' = 'critical') {
+function playAlertBeep(type: 'critical' | 'warning' | 'fire' = 'critical') {
   try {
     const ctx = new AudioContext();
+
+    if (type === 'fire') {
+      // Sirene de incêndio: varredura ascendente/descendente repetida
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.35, ctx.currentTime);
+      const now = ctx.currentTime;
+      // Sweep up and down twice
+      osc.frequency.setValueAtTime(500, now);
+      osc.frequency.linearRampToValueAtTime(1200, now + 0.4);
+      osc.frequency.linearRampToValueAtTime(500, now + 0.8);
+      osc.frequency.linearRampToValueAtTime(1200, now + 1.2);
+      osc.frequency.linearRampToValueAtTime(500, now + 1.6);
+      gain.gain.setValueAtTime(0.35, now + 1.5);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 1.7);
+      osc.start(now);
+      osc.stop(now + 1.7);
+      setTimeout(() => ctx.close(), 2000);
+      return;
+    }
+
     const oscillator = ctx.createOscillator();
     const gainNode = ctx.createGain();
-
     oscillator.connect(gainNode);
     gainNode.connect(ctx.destination);
 
@@ -37,12 +60,18 @@ interface CriticalCondition {
   type: 'critical' | 'warning';
 }
 
+interface CriticalCondition {
+  key: string;
+  message: string;
+  type: 'critical' | 'warning' | 'fire';
+}
+
 function getCriticalConditions(data: SensorData): CriticalCondition[] {
   const conditions: CriticalCondition[] = [];
 
   // Flame detected
   if (data.flameDetected > 0) {
-    conditions.push({ key: 'flame', message: 'ALERTA CRITICO: Chamas detectadas pelo sensor!', type: 'critical' });
+    conditions.push({ key: 'flame', message: 'ALERTA CRITICO: Chamas detectadas pelo sensor!', type: 'fire' });
   }
   // Critical temperature
   if (data.temperature >= 40) {
