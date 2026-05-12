@@ -57,12 +57,6 @@ function playAlertBeep(type: 'critical' | 'warning' | 'fire' = 'critical') {
 interface CriticalCondition {
   key: string;
   message: string;
-  type: 'critical' | 'warning';
-}
-
-interface CriticalCondition {
-  key: string;
-  message: string;
   type: 'critical' | 'warning' | 'fire';
 }
 
